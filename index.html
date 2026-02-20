@@ -1,0 +1,369 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Path Matcher</title>
+  <style>
+    :root {
+      --bg1: #fdf6e3;
+      --bg2: #d9f0ff;
+      --ink: #162027;
+      --accent: #00796b;
+      --card: rgba(255, 255, 255, 0.86);
+      --border: rgba(22, 32, 39, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.9) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(0, 121, 107, 0.18) 0%, transparent 35%),
+        linear-gradient(125deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(760px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+      padding: 28px;
+      animation: rise 500ms ease-out;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+      letter-spacing: 0.2px;
+    }
+
+    p {
+      margin: 0 0 20px;
+      line-height: 1.45;
+      color: rgba(22, 32, 39, 0.85);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      outline: none;
+      background: #fff;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.17);
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    button:hover { filter: brightness(1.06); }
+    button:active { transform: translateY(1px); }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 34px;
+      margin-bottom: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #edf8f6;
+      color: #0d5e54;
+      border: 1px solid rgba(0, 121, 107, 0.25);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      animation: pop 220ms ease-out;
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .chip button {
+      all: unset;
+      cursor: pointer;
+      font-weight: 800;
+      color: #0d5e54;
+      line-height: 1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .muted-btn {
+      background: #f1f4f5;
+      color: #334;
+      font-weight: 600;
+    }
+
+    .results {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .job {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .job h3 {
+      margin: 0 0 6px;
+      font-size: 1.02rem;
+      color: #0b4f47;
+    }
+
+    .job p {
+      margin: 0;
+      font-size: 0.94rem;
+    }
+
+    .empty {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      color: rgba(22, 32, 39, 0.74);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    @media (max-width: 620px) {
+      .input-row { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Career Path Matcher</h1>
+    <p>Tell the AI what you are good at and interested in. Example: "Talking to people" and "Video games".</p>
+
+    <div class="input-row">
+      <input id="traitInput" type="text" placeholder="Add a strength or interest, then press Enter" maxlength="60" />
+      <button id="addBtn" type="button">Add</button>
+    </div>
+
+    <div id="chips" class="chips" aria-live="polite"></div>
+
+    <div class="actions">
+      <button id="matchBtn" type="button">Get 3 Job Ideas</button>
+      <button id="clearBtn" class="muted-btn" type="button">Clear</button>
+    </div>
+
+    <section id="results" class="results">
+      <div class="empty">Add at least 2 strengths/interests to see matches.</div>
+    </section>
+  </main>
+
+  <script>
+    const careers = [
+      {
+        title: "Community Manager (Gaming)",
+        tags: ["people", "talk", "social", "games", "video games", "online", "community"],
+        why: "You can build trust with players, moderate discussions, and keep communities active."
+      },
+      {
+        title: "Sales Engineer",
+        tags: ["talk", "people", "explain", "tech", "software", "problem solving"],
+        why: "This mixes technical knowledge with client conversations and solution demos."
+      },
+      {
+        title: "UX Researcher",
+        tags: ["empathy", "people", "interview", "analyze", "design", "behavior"],
+        why: "You can translate user interviews into product improvements."
+      },
+      {
+        title: "Game Designer",
+        tags: ["games", "video games", "creative", "story", "systems", "design"],
+        why: "Your gaming instincts can turn into mechanics, rules, and fun player loops."
+      },
+      {
+        title: "Technical Recruiter",
+        tags: ["people", "network", "talk", "tech", "talent", "communication"],
+        why: "Strong communication plus tech awareness helps match candidates to teams."
+      },
+      {
+        title: "Digital Marketer",
+        tags: ["creative", "social", "content", "data", "trends", "communication"],
+        why: "You can craft campaigns and test what messaging works best."
+      },
+      {
+        title: "Product Manager",
+        tags: ["leadership", "strategy", "people", "tech", "planning", "communication"],
+        why: "This role connects customer needs, engineering constraints, and business goals."
+      },
+      {
+        title: "Data Analyst",
+        tags: ["data", "math", "analysis", "excel", "sql", "problem solving"],
+        why: "You can turn messy numbers into clear decisions for teams."
+      },
+      {
+        title: "Cybersecurity Analyst",
+        tags: ["security", "detail", "problem solving", "tech", "risk", "investigation"],
+        why: "You can investigate threats and protect systems using structured thinking."
+      },
+      {
+        title: "Instructional Designer",
+        tags: ["teaching", "writing", "communication", "learning", "creative"],
+        why: "You can design training content that helps others learn faster."
+      }
+    ];
+
+    const input = document.getElementById("traitInput");
+    const addBtn = document.getElementById("addBtn");
+    const matchBtn = document.getElementById("matchBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const chipsEl = document.getElementById("chips");
+    const resultsEl = document.getElementById("results");
+
+    let traits = [];
+
+    const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+
+    function addTrait() {
+      const raw = input.value.trim();
+      const key = normalize(raw);
+      if (!raw || !key) return;
+      if (!traits.includes(key)) {
+        traits.push(key);
+        renderChips();
+      }
+      input.value = "";
+      input.focus();
+    }
+
+    function removeTrait(key) {
+      traits = traits.filter((t) => t !== key);
+      renderChips();
+    }
+
+    function renderChips() {
+      chipsEl.innerHTML = "";
+      traits.forEach((trait) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.innerHTML = `<span>${trait}</span><button type=\"button\" aria-label=\"Remove ${trait}\">x</button>`;
+        chip.querySelector("button").addEventListener("click", () => removeTrait(trait));
+        chipsEl.appendChild(chip);
+      });
+    }
+
+    function scoreCareer(career) {
+      let score = 0;
+      const hits = [];
+      traits.forEach((trait) => {
+        career.tags.forEach((tag) => {
+          if (trait.includes(tag) || tag.includes(trait)) {
+            score += 2;
+            hits.push(tag);
+          }
+        });
+      });
+      if (traits.length >= 3 && career.tags.some((tag) => traits.join(" ").includes(tag))) {
+        score += 1;
+      }
+      return { score, hits: [...new Set(hits)] };
+    }
+
+    function fallbackCareers() {
+      const shuffled = [...careers].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 3).map((c) => ({ title: c.title, why: c.why, reason: "general fit" }));
+    }
+
+    function getMatches() {
+      if (traits.length < 2) {
+        resultsEl.innerHTML = `<div class=\"empty\">Add at least 2 strengths/interests to see matches.</div>`;
+        return;
+      }
+
+      const ranked = careers
+        .map((career) => ({ career, ...scoreCareer(career) }))
+        .sort((a, b) => b.score - a.score);
+
+      let top = ranked.filter((item) => item.score > 0).slice(0, 3);
+      if (top.length < 3) {
+        const existing = new Set(top.map((t) => t.career.title));
+        const fill = fallbackCareers().filter((f) => !existing.has(f.title));
+        fill.forEach((item) => {
+          top.push({ career: { title: item.title, why: item.why }, hits: [item.reason], score: 0 });
+        });
+      }
+      top = top.slice(0, 3);
+
+      resultsEl.innerHTML = "";
+      top.forEach((item, index) => {
+        const card = document.createElement("article");
+        card.className = "job";
+        const reason = item.hits.length ? item.hits.join(", ") : "general strengths";
+        card.innerHTML = `
+          <h3>${index + 1}. ${item.career.title}</h3>
+          <p>${item.career.why} Match clues: ${reason}.</p>
+        `;
+        resultsEl.appendChild(card);
+      });
+    }
+
+    addBtn.addEventListener("click", addTrait);
+    matchBtn.addEventListener("click", getMatches);
+    clearBtn.addEventListener("click", () => {
+      traits = [];
+      renderChips();
+      resultsEl.innerHTML = `<div class=\"empty\">Add at least 2 strengths/interests to see matches.</div>`;
+      input.focus();
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        addTrait();
+      }
+    });
+  </script>
+</body>
+</html>
